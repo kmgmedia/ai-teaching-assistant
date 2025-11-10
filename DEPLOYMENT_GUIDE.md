@@ -3,6 +3,7 @@
 ## 📋 Pre-Deployment Checklist
 
 Before deploying, ensure:
+
 - ✅ OpenAI API key with active billing
 - ✅ Google Sheets credentials (service account JSON)
 - ✅ All dependencies in `requirements.txt`
@@ -13,11 +14,13 @@ Before deploying, ensure:
 ## 🎯 Deployment Options
 
 ### **Option 1: Streamlit Cloud (Recommended for Dashboard)**
+
 **Best for:** Non-technical users, free tier available, easiest setup
 
 #### Steps:
 
 1. **Push to GitHub**
+
    ```powershell
    git init
    git add .
@@ -28,15 +31,17 @@ Before deploying, ensure:
    ```
 
 2. **Create `.streamlit/secrets.toml`**
+
    ```powershell
    mkdir .streamlit
    ```
-   
+
    Create `.streamlit/secrets.toml`:
+
    ```toml
    OPENAI_API_KEY = "sk-proj-your-key-here"
    GOOGLE_SHEET_ID = "your-sheet-id-here"
-   
+
    # Paste entire Google Sheets credentials JSON
    [gcp_service_account]
    type = "service_account"
@@ -53,6 +58,7 @@ Before deploying, ensure:
 
 3. **Update `google_sheets.py` for Streamlit Cloud**
    Add this at the top of `get_sheets_client()`:
+
    ```python
    # Check if running on Streamlit Cloud
    if 'gcp_service_account' in st.secrets:
@@ -83,34 +89,41 @@ Before deploying, ensure:
 ---
 
 ### **Option 2: Heroku (For Flask API + Dashboard)**
+
 **Best for:** Full-stack deployment, REST API access, custom domain
 
 #### Steps:
 
 1. **Create `Procfile`**
+
    ```powershell
    New-Item -Path "Procfile" -ItemType File
    ```
-   
+
    Add to `Procfile`:
+
    ```
    web: gunicorn main:app
    ```
 
 2. **Install Gunicorn**
+
    ```powershell
    venv\Scripts\pip.exe install gunicorn
    venv\Scripts\pip.exe freeze > requirements.txt
    ```
 
 3. **Create `runtime.txt`**
+
    ```
    python-3.11.9
    ```
+
    (Heroku doesn't support Python 3.14 yet - use 3.11.x)
 
 4. **Update `.gitignore`**
    Ensure these are excluded:
+
    ```
    .env
    credentials/
@@ -118,21 +131,22 @@ Before deploying, ensure:
    ```
 
 5. **Deploy to Heroku**
+
    ```powershell
    # Install Heroku CLI first: https://devcenter.heroku.com/articles/heroku-cli
-   
+
    heroku login
    heroku create ai-teaching-assistant
-   
+
    # Set environment variables
    heroku config:set OPENAI_API_KEY=sk-proj-your-key-here
    heroku config:set GOOGLE_SHEET_ID=your-sheet-id-here
-   
+
    # Upload Google Sheets credentials (as base64)
    $creds = Get-Content credentials\google-sheets-credentials.json -Raw
    $encoded = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($creds))
    heroku config:set GOOGLE_SHEETS_CREDENTIALS_BASE64=$encoded
-   
+
    # Deploy
    git push heroku main
    heroku open
@@ -140,10 +154,11 @@ Before deploying, ensure:
 
 6. **Update `google_sheets.py` for Heroku**
    Add this to handle base64 credentials:
+
    ```python
    import base64
    import json
-   
+
    # In get_sheets_client():
    creds_base64 = os.getenv("GOOGLE_SHEETS_CREDENTIALS_BASE64")
    if creds_base64:
@@ -164,11 +179,13 @@ Before deploying, ensure:
 ---
 
 ### **Option 3: Render (Modern Alternative to Heroku)**
+
 **Best for:** Free tier, automatic deployments, easier than Heroku
 
 #### Steps:
 
 1. **Create `render.yaml`**
+
    ```yaml
    services:
      - type: web
@@ -200,6 +217,7 @@ Before deploying, ensure:
 ---
 
 ### **Option 4: Railway (Simplest Deployment)**
+
 **Best for:** Zero-config deployment, modern developer experience
 
 #### Steps:
@@ -222,6 +240,7 @@ Before deploying, ensure:
 ---
 
 ### **Option 5: AWS EC2 (Full Control)**
+
 **Best for:** Production-grade, scalable, custom configurations
 
 #### Quick Setup:
@@ -229,27 +248,28 @@ Before deploying, ensure:
 1. **Launch EC2 Instance** (Ubuntu 22.04)
 
 2. **SSH and Setup**
+
    ```bash
    # Install dependencies
    sudo apt update
    sudo apt install python3-pip python3-venv nginx -y
-   
+
    # Clone repository
    git clone https://github.com/YOUR_USERNAME/ai-teaching-assistant.git
    cd ai-teaching-assistant
-   
+
    # Setup virtual environment
    python3 -m venv venv
    source venv/bin/activate
    pip install -r requirements.txt
-   
+
    # Setup environment variables
    nano .env
    # Add your API keys
-   
+
    # Install Gunicorn
    pip install gunicorn
-   
+
    # Run with Gunicorn
    gunicorn --bind 0.0.0.0:8000 main:app
    ```
@@ -265,14 +285,18 @@ Before deploying, ensure:
 ## 🎯 **Recommended Path for You**
 
 ### **For Dashboard Only:**
+
 → **Streamlit Cloud** (Option 1)
+
 - Free
 - Zero server management
 - Perfect for teachers
 - Deploy in 5 minutes
 
 ### **For Full API + Dashboard:**
+
 → **Railway** (Option 4)
+
 - Easiest full-stack deployment
 - Free tier sufficient for testing
 - Auto-deployment on GitHub push

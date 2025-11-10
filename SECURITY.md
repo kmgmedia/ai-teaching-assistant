@@ -3,6 +3,7 @@
 ## ✅ Current Security Status
 
 Your project is configured securely:
+
 - `.env` file is gitignored ✅
 - `credentials/*.json` files are gitignored ✅
 - No sensitive data in repository ✅
@@ -12,6 +13,7 @@ Your project is configured securely:
 ## 🚨 Security Checklist Before Deployment
 
 ### 1. **Verify Gitignore is Working**
+
 ```powershell
 # Check that sensitive files are NOT staged
 git status
@@ -26,6 +28,7 @@ git status
 Your current API key has been used in development and may have been logged. **Best practice: Create a new production key**
 
 **Steps:**
+
 1. Go to https://platform.openai.com/api-keys
 2. Click "Create new secret key"
 3. Name it: "AI Teaching Assistant - Production"
@@ -34,6 +37,7 @@ Your current API key has been used in development and may have been logged. **Be
 6. **Delete the old key** from OpenAI dashboard
 
 ### 3. **Check for Accidental Key Exposure**
+
 ```powershell
 # Search for hardcoded API keys in code
 Select-String -Path "*.py" -Pattern "sk-proj-" -Recurse -Exclude "venv"
@@ -43,6 +47,7 @@ Select-String -Path "*.py" -Pattern "private_key" -Recurse -Exclude "venv"
 If any matches found (should be NONE), remove them immediately.
 
 ### 4. **Verify No Keys in Git History**
+
 ```powershell
 # Check what would be committed
 git diff --cached
@@ -58,7 +63,9 @@ git diff --cached
 ## 🔐 Environment Variable Management by Platform
 
 ### **Streamlit Cloud**
+
 Store secrets in `.streamlit/secrets.toml` (local only, gitignored):
+
 ```toml
 OPENAI_API_KEY = "sk-proj-NEW-KEY-HERE"
 GOOGLE_SHEET_ID = "your-sheet-id"
@@ -72,6 +79,7 @@ project_id = "your-project"
 Then add to Streamlit Cloud dashboard → Settings → Secrets
 
 ### **Heroku**
+
 ```powershell
 heroku config:set OPENAI_API_KEY=sk-proj-NEW-KEY-HERE
 heroku config:set GOOGLE_SHEET_ID=your-sheet-id
@@ -83,11 +91,14 @@ heroku config:set GOOGLE_SHEETS_CREDENTIALS_BASE64=$encoded
 ```
 
 ### **Railway / Render**
+
 Add in web dashboard:
+
 - Navigate to Environment Variables section
 - Add `OPENAI_API_KEY`, `GOOGLE_SHEET_ID`, and `GOOGLE_SHEETS_CREDENTIALS_BASE64`
 
 ### **AWS EC2**
+
 ```bash
 # SSH into server
 nano .env
@@ -105,7 +116,9 @@ chmod 600 .env
 ## 🛡️ Additional Security Best Practices
 
 ### **1. Enable Rate Limiting**
+
 Add to `main.py`:
+
 ```python
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -123,7 +136,9 @@ def generate_lesson():
 ```
 
 ### **2. Add API Authentication**
+
 For production, add simple API key authentication:
+
 ```python
 from functools import wraps
 
@@ -143,7 +158,9 @@ def generate_lesson():
 ```
 
 ### **3. Enable HTTPS Only**
+
 In production, force HTTPS:
+
 ```python
 from flask_talisman import Talisman
 
@@ -151,11 +168,13 @@ Talisman(app, force_https=True)
 ```
 
 ### **4. Rotate Keys Regularly**
+
 - OpenAI API key: Every 90 days
 - Google Service Account: Every 180 days
 - Set calendar reminders
 
 ### **5. Monitor API Usage**
+
 - Check OpenAI dashboard weekly: https://platform.openai.com/usage
 - Set spending limits in OpenAI billing settings
 - Alert if unusual usage detected
@@ -165,12 +184,14 @@ Talisman(app, force_https=True)
 ## ⚠️ What to Do If Keys Are Exposed
 
 ### **If OpenAI Key is Leaked:**
+
 1. **Immediately revoke** at https://platform.openai.com/api-keys
 2. Create new key
 3. Update all environments (local + production)
 4. Check OpenAI usage logs for unauthorized use
 
 ### **If Google Credentials are Leaked:**
+
 1. Go to Google Cloud Console
 2. IAM & Admin → Service Accounts
 3. Delete compromised service account
@@ -180,6 +201,7 @@ Talisman(app, force_https=True)
 7. Update all environments
 
 ### **If Committed to Git:**
+
 ```powershell
 # Remove from Git history (DESTRUCTIVE - use carefully)
 git filter-branch --force --index-filter \
@@ -222,6 +244,7 @@ Then immediately rotate ALL exposed keys.
 ## 📞 Security Contact
 
 If you discover a security vulnerability:
+
 1. **DO NOT** create a public GitHub issue
 2. Rotate compromised credentials immediately
 3. Document the incident
