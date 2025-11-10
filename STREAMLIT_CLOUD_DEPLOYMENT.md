@@ -15,6 +15,7 @@
 ### Option A: Using GitHub Website (Recommended)
 
 1. **Go to GitHub and create new repository:**
+
    - Visit: https://github.com/new
    - Repository name: `ai-teaching-assistant`
    - Description: "AI-powered teaching assistant for lesson notes, reports, and parent communication"
@@ -66,15 +67,19 @@ git push -u origin main
 2. You'll see a form with these fields:
 
 **Repository:**
+
 - Select your repository: `YOUR_USERNAME/ai-teaching-assistant`
 
 **Branch:**
+
 - Select: `main`
 
 **Main file path:**
+
 - Enter: `dashboard.py`
 
 **App URL (optional):**
+
 - Leave default or customize: `your-app-name.streamlit.app`
 
 ### 3.3 Configure Secrets
@@ -140,10 +145,12 @@ Once deployment completes, you'll see:
 ### If deployment fails:
 
 1. **Check Build Logs:**
+
    - Look for errors in the Streamlit Cloud dashboard
    - Common issues: missing dependencies, Python version mismatch
 
 2. **Verify Secrets:**
+
    - Go to app settings → Secrets
    - Ensure all secrets are pasted correctly
    - Check for formatting errors (TOML syntax)
@@ -194,6 +201,7 @@ git push origin main
 3. Click "⚙️ Settings" (top right)
 
 **Available options:**
+
 - **Secrets:** Update API keys/credentials
 - **General:** Change app name, URL, or make public
 - **Resources:** View usage (free tier: 1 GB RAM, shared CPU)
@@ -211,6 +219,7 @@ git push origin main
 ## 💰 Cost & Limits
 
 **Streamlit Cloud FREE Tier:**
+
 - ✅ 1 private app
 - ✅ Unlimited public apps
 - ✅ 1 GB RAM per app
@@ -218,11 +227,13 @@ git push origin main
 - ✅ Auto-deploys from GitHub
 
 **Limitations:**
+
 - Apps sleep after 7 days of inactivity
 - Shared CPU (can be slow during peak times)
 - Limited to 1 concurrent user on free tier
 
 **Paid Plans:**
+
 - Starter: $20/month (more resources, no sleep)
 - Team: $250/month (team collaboration, priority support)
 
@@ -241,11 +252,13 @@ git push origin main
 ## 📞 Support
 
 **Streamlit Cloud Issues:**
+
 - Docs: https://docs.streamlit.io/streamlit-community-cloud
 - Forum: https://discuss.streamlit.io
 - Status: https://www.streamlitstatus.com
 
 **Your App Issues:**
+
 - Check logs in Streamlit Cloud dashboard
 - Review `SECURITY.md` for API key troubleshooting
 - Consult `README.md` for feature documentation
