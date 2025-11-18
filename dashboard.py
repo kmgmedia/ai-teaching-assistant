@@ -204,31 +204,45 @@ elif page == "📊 Report Generator":
     if use_sheets:
         try:
             students = load_students_cached()  # Use cached data
-            student_names = [s.get('Name', '') for s in students]
             
-            selected_student = st.selectbox("Select Student *", student_names)
+            # Get unique student names
+            import pandas as pd
+            df_all = pd.DataFrame(students)
+            unique_students = sorted(df_all['Name'].unique()) if 'Name' in df_all.columns else []
+            
+            selected_student = st.selectbox("Select Student *", unique_students)
             
             if selected_student:
-                student_data = get_student_cached(selected_student)  # Use cached data
+                # Get all records for this student
+                student_records = df_all[df_all['Name'] == selected_student] if 'Name' in df_all.columns else pd.DataFrame()
+                
+                # Aggregate data for the report
+                all_subjects = student_records['Subject'].tolist() if 'Subject' in student_records.columns else []
+                all_notes = student_records['Notes'].tolist() if 'Notes' in student_records.columns else []
+                all_behaviors = student_records['Behavior'].tolist() if 'Behavior' in student_records.columns else []
+                
+                # Combine notes and behaviors
+                combined_notes = "\n".join([f"- {subj}: {note}" for subj, note in zip(all_subjects, all_notes)])
+                combined_behavior = "\n".join([f"- {subj}: {beh}" for subj, beh in zip(all_subjects, all_behaviors)])
                 
                 col1, col2 = st.columns(2)
                 
                 with col1:
                     student_name = st.text_input("Student Name *", value=selected_student)
                     period = st.text_input("Period *", value="Term 1 (2025)", placeholder="e.g., Term 1, Q2 2025")
-                    subject = st.text_input("Subject *", value=student_data.get('Subject', ''))
+                    subject = st.text_input("Subject *", value="Overall Progress", placeholder="e.g., Overall Progress or specific subject")
                 
                 with col2:
                     performance_notes = st.text_area(
-                        "Performance Notes *",
-                        value=student_data.get('Notes', ''),
-                        height=100,
+                        "Performance Notes * (All Subjects)",
+                        value=combined_notes if combined_notes else "No performance notes available",
+                        height=150,
                         placeholder="Academic observations and achievements"
                     )
                     behavior_notes = st.text_area(
-                        "Behavior Notes *",
-                        value=student_data.get('Behavior', ''),
-                        height=100,
+                        "Behavior Notes * (All Subjects)",
+                        value=combined_behavior if combined_behavior else "No behavior notes available",
+                        height=150,
                         placeholder="Social-emotional and behavioral observations"
                     )
                     save_to_sheets = st.checkbox("💾 Save report back to Google Sheets", value=True)
@@ -371,36 +385,87 @@ elif page == "👥 View Students":
         students = load_students_cached()  # Use cached data
         
         if students:
-            st.success(f"✅ Found {len(students)} students in your Google Sheet")
-            
-            # Display as table
+            # Get unique student names
             import pandas as pd
-            df = pd.DataFrame(students)
-            st.dataframe(df, width="stretch")  # Updated from use_container_width
+            df_all = pd.DataFrame(students)
+            unique_students = df_all['Name'].unique() if 'Name' in df_all.columns else []
+            
+            st.success(f"✅ Found {len(unique_students)} students with {len(students)} total subject records")
+            
+            # Option to toggle view
+            view_mode = st.radio(
+                "📊 View Mode:",
+                ["Student Summary", "All Subject Records"],
+                horizontal=True,
+                help="Summary shows each student once with averages. Records shows all subject entries."
+            )
+            
+            if view_mode == "Student Summary":
+                # Aggregate data by student
+                if 'Name' in df_all.columns and 'Score' in df_all.columns:
+                    summary = df_all.groupby('Name').agg({
+                        'Score': 'mean',
+                        'Subject': lambda x: ', '.join(x.unique()[:3]) + ('...' if len(x.unique()) > 3 else ''),
+                        'Behavior': lambda x: x.mode()[0] if len(x.mode()) > 0 else 'N/A'
+                    }).reset_index()
+                    summary.columns = ['Name', 'Average Score', 'Subjects', 'Overall Behavior']
+                    summary['Average Score'] = summary['Average Score'].round(1)
+                    st.dataframe(summary, width="stretch", hide_index=True)
+                else:
+                    st.warning("Missing required columns (Name, Score) in your sheet")
+            else:
+                # Show all records
+                st.dataframe(df_all, width="stretch", hide_index=True)
             
             st.markdown("---")
             
-            # Individual student view
+            # Individual student view with ALL subjects
             st.subheader("🔍 View Individual Student")
-            selected_name = st.selectbox("Select a student", [s.get('Name', '') for s in students])
+            selected_name = st.selectbox("Select a student", sorted(unique_students))
             
             if selected_name:
-                student = get_student_cached(selected_name)  # Use cached data
+                # Get all records for this student
+                student_records = df_all[df_all['Name'] == selected_name] if 'Name' in df_all.columns else pd.DataFrame()
                 
-                if student:
-                    col1, col2 = st.columns(2)
+                if not student_records.empty:
+                    # Show student overview
+                    col1, col2, col3 = st.columns(3)
                     
                     with col1:
-                        st.metric("Name", student.get('Name', 'N/A'))
-                        st.metric("Subject", student.get('Subject', 'N/A'))
-                        st.metric("Score", student.get('Score', 'N/A'))
-                    
+                        st.metric("📛 Name", selected_name)
                     with col2:
-                        st.markdown("**📝 Notes:**")
-                        st.info(student.get('Notes', 'No notes available'))
-                        
-                        st.markdown("**🎭 Behavior:**")
-                        st.info(student.get('Behavior', 'No behavior notes'))
+                        avg_score = student_records['Score'].mean() if 'Score' in student_records.columns else 0
+                        st.metric("📊 Average Score", f"{avg_score:.1f}")
+                    with col3:
+                        num_subjects = len(student_records)
+                        st.metric("📚 Subjects", num_subjects)
+                    
+                    st.markdown("---")
+                    st.markdown("### 📚 Subject Breakdown")
+                    
+                    # Display each subject
+                    for idx, record in student_records.iterrows():
+                        with st.expander(f"**{record.get('Subject', 'N/A')}** - Score: {record.get('Score', 'N/A')}", expanded=False):
+                            col1, col2 = st.columns(2)
+                            
+                            with col1:
+                                st.markdown("**📝 Notes:**")
+                                st.info(record.get('Notes', 'No notes available'))
+                            
+                            with col2:
+                                st.markdown("**🎭 Behavior:**")
+                                behavior = record.get('Behavior', 'N/A')
+                                if behavior == 'Excellent':
+                                    st.success(behavior)
+                                elif behavior == 'Good':
+                                    st.info(behavior)
+                                else:
+                                    st.warning(behavior)
+                                
+                                if 'Attendance' in record:
+                                    st.markdown(f"**📅 Attendance:** {record.get('Attendance', 'N/A')}")
+                else:
+                    st.error(f"No data found for {selected_name}")
                     
                     # Quick actions
                     st.markdown("---")
