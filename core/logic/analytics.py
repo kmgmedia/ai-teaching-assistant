@@ -20,6 +20,7 @@ def calculate_class_statistics(df: pd.DataFrame) -> Dict[str, Any]:
         return {}
     
     # Convert Score to numeric
+    df = df.copy()
     df['Score'] = pd.to_numeric(df['Score'], errors='coerce')
     
     stats = {
@@ -49,6 +50,7 @@ def get_subject_performance(df: pd.DataFrame) -> pd.DataFrame:
         return pd.DataFrame()
     
     # Convert Score to numeric
+    df = df.copy()
     df['Score'] = pd.to_numeric(df['Score'], errors='coerce')
     
     subject_stats = df.groupby('Subject').agg({
@@ -76,6 +78,7 @@ def get_grade_performance(df: pd.DataFrame) -> pd.DataFrame:
         return pd.DataFrame()
     
     # Convert Score to numeric
+    df = df.copy()
     df['Score'] = pd.to_numeric(df['Score'], errors='coerce')
     
     grade_stats = df.groupby('Grade').agg({
@@ -105,6 +108,7 @@ def get_top_students(df: pd.DataFrame, n: int = 5) -> pd.DataFrame:
         return pd.DataFrame()
     
     # Convert Score to numeric
+    df = df.copy()
     df['Score'] = pd.to_numeric(df['Score'], errors='coerce')
     
     top_students = df.groupby('Name').agg({
@@ -136,6 +140,7 @@ def get_struggling_students(df: pd.DataFrame, threshold: float = 60, n: int = 5)
         return pd.DataFrame()
     
     # Convert Score to numeric
+    df = df.copy()
     df['Score'] = pd.to_numeric(df['Score'], errors='coerce')
     
     struggling = df.groupby('Name').agg({
@@ -169,35 +174,6 @@ def get_behavior_distribution(df: pd.DataFrame) -> Dict[str, int]:
     return behavior_counts
 
 
-def get_student_subject_details(df: pd.DataFrame, student_name: str) -> pd.DataFrame:
-    """
-    Get detailed subject breakdown for a specific student.
-    
-    Args:
-        df: DataFrame with student data
-        student_name: Name of the student
-        
-    Returns:
-        DataFrame with student's subject details
-    """
-    if df.empty or 'Name' not in df.columns:
-        return pd.DataFrame()
-    
-    student_data = df[df['Name'] == student_name]
-    
-    if student_data.empty:
-        return pd.DataFrame()
-    
-    # Convert Score to numeric
-    student_data['Score'] = pd.to_numeric(student_data['Score'], errors='coerce')
-    
-    # Select relevant columns
-    cols = ['Subject', 'Score', 'Behavior', 'Notes']
-    available_cols = [col for col in cols if col in student_data.columns]
-    
-    return student_data[available_cols].sort_values('Subject')
-
-
 def get_teacher_performance(df: pd.DataFrame) -> pd.DataFrame:
     """
     Calculate performance statistics by teacher.
@@ -212,6 +188,7 @@ def get_teacher_performance(df: pd.DataFrame) -> pd.DataFrame:
         return pd.DataFrame()
     
     # Convert Score to numeric
+    df = df.copy()
     df['Score'] = pd.to_numeric(df['Score'], errors='coerce')
     
     teacher_stats = df.groupby('Teacher').agg({

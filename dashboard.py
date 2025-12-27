@@ -342,7 +342,8 @@ elif page == "📊 Analytics":
     except Exception as e:
         st.error(f"❌ Error loading analytics: {str(e)}")
         import traceback
-        st.code(traceback.format_exc())
+        with st.expander("Show error details"):
+            st.code(traceback.format_exc())
 
 
 # LESSON GENERATOR PAGE

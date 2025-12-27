@@ -21,14 +21,14 @@ def get_config_value(key, default=None):
     return os.getenv(key, default)
 
 # Google Gemini Configuration
-GOOGLE_API_KEY = get_config_value("GEMINI_API_KEY") or get_config_value("GOOGLE_API_KEY")
+GOOGLE_API_KEY = get_config_value("GOOGLE_API_KEY")
 GOOGLE_MODEL = get_config_value("GOOGLE_MODEL", "gemini-1.5-flash")
 GOOGLE_TEMPERATURE = float(get_config_value("GOOGLE_TEMPERATURE", "0.7"))
 GOOGLE_MAX_TOKENS = int(get_config_value("GOOGLE_MAX_TOKENS", "1000"))
 
 # Google Sheets Configuration
 GOOGLE_SHEETS_CREDENTIALS = get_config_value("GOOGLE_SHEETS_CREDENTIALS")
-GOOGLE_SHEET_ID = get_config_value("GOOGLE_SHEETS_ID")
+GOOGLE_SHEET_ID = get_config_value("GOOGLE_SHEET_ID")
 
 # Flask Configuration
 FLASK_HOST = os.getenv("FLASK_HOST", "0.0.0.0")
