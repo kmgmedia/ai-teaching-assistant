@@ -2,6 +2,7 @@
 python-dotenv==1.0.0
 streamlit
 requests
+pandas
 
 # Google Generative AI (Gemini)
 google-genai
