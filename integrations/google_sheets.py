@@ -49,22 +49,31 @@ def get_sheets_client():
     Raises:
         Exception: If authentication fails
     """
-    # Try local credentials first
+    # Try Streamlit secrets first (for cloud deployment)
+    try:
+        import streamlit as st
+        if hasattr(st, 'secrets') and 'gcp_service_account' in st.secrets:
+            credentials = Credentials.from_service_account_info(
+                st.secrets["gcp_service_account"],
+                scopes=SCOPES
+            )
+            logger.info("Using Streamlit secrets for authentication")
+            client = gspread.authorize(credentials)
+            logger.info("Google Sheets client authenticated successfully (Streamlit Cloud)")
+            return client
+    except (ImportError, AttributeError, FileNotFoundError, KeyError) as e:
+        logger.info(f"Streamlit secrets not available: {str(e)}, trying local credentials")
+    
+    # Fallback to local credentials
     try:
         credentials = _load_local_credentials()
         logger.info("Using local credentials file for authentication")
+        client = gspread.authorize(credentials)
+        logger.info("Google Sheets client authenticated successfully (local)")
+        return client
     except Exception as e:
         logger.error(f"Failed to load local credentials: {str(e)}")
         raise
-    
-    # Authorize and cache client
-    try:
-        client = gspread.authorize(credentials)
-        logger.info("Google Sheets client authenticated successfully")
-    except Exception as e:
-        logger.error(f"Failed to authorize gspread client: {str(e)}")
-        raise
-    return client
 
 
 def get_sheet(sheet_id=None, sheet_name=None):
